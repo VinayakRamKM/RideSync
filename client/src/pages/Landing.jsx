@@ -113,7 +113,7 @@ export default function Landing() {
 
       <footer className="site-foot">
         <div className="landing-brand footer-brand">
-          <span className="landing-brand-mark" aria-hidden="true">⌖</span>
+          <span className="landing-brand-mark" aria-hidden="true">📍</span>
           <span>Ride<span>Sync</span></span>
         </div>
         <p>Stay Connected · Stay Safe · Ride Together</p>

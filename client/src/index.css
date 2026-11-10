@@ -256,3 +256,92 @@ button, input, textarea { font: inherit; }
   .features ul { grid-template-columns: 1fr 1fr; }
   .features li { padding: 0 6px; }
 }
+
+
+
+
+/* Interaction and accessibility improvements */
+
+.btn {
+  transition: background 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.btn:not(:disabled):hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.btn:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}
+
+.ride-card {
+  border: 1px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.ride-card:hover {
+  transform: translateY(-3px);
+  border-color: #cbd9e9;
+  box-shadow: 0 12px 28px rgba(16, 35, 61, 0.12);
+}
+
+.step-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(16, 35, 61, 0.09);
+}
+
+.card input:focus,
+.card textarea:focus,
+.join-row input:focus {
+  outline: none;
+  border-color: var(--teal-dark);
+  box-shadow: 0 0 0 3px rgba(18, 192, 138, 0.14);
+}
+
+.hints button {
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.hints button:hover {
+  background: #e8f1ff;
+  border-color: #b8cce5;
+}
+
+/* Visible keyboard navigation */
+.btn:focus-visible,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(26, 115, 232, 0.45);
+  outline-offset: 3px;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .ride-card:hover,
+  .step-card:hover,
+  .btn:not(:disabled):hover {
+    transform: none;
+  }
+}
