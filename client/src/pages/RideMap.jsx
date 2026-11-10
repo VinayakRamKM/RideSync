@@ -200,9 +200,12 @@ export default function RideMap() {
           {alert.userId && (
             <button
               className="btn btn-primary"
-              onClick={() => {
+              onClick={async () => {
                 const member = ride.members.find((m) => m.userId === alert.userId) || alert;
-                if (member) navigateTo(member);
+                if (member) {
+                  await navigateTo(member);
+                  setAlert(null);
+                }
               }}
             >
               Navigate to {alert.name}
