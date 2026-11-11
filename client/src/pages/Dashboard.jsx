@@ -7,13 +7,18 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [rides, setRides] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
 
   async function load() {
+  try {
     const data = await api('/api/rides');
     setRides(data);
+  } finally {
+    setLoading(false);
   }
+}
 
   useEffect(() => {
     load().catch((err) => setError(err.message));
@@ -55,7 +60,11 @@ export default function Dashboard() {
             Create ride
           </Link>
         </div>
-        {error && <div className="alert">{error}</div>}
+        {error && (
+  <div className="alert" role="alert">
+    {error}
+  </div>
+)}
         <form className="join-row" onSubmit={join}>
           <input
             placeholder="Enter ride code"
@@ -66,21 +75,45 @@ export default function Dashboard() {
             Join ride
           </button>
         </form>
-        <div className="ride-grid">
-          {rides.length === 0 && <p className="muted">No rides yet. Create one to get started.</p>}
-          {rides.map((ride) => (
-            <Link key={ride.id} className="ride-card" to={`/app/ride/${ride.id}`}>
-              <div className={`pill ${ride.status}`}>{ride.status}</div>
-              <h3>{ride.name}</h3>
-              <p>
-                {ride.startName} → {ride.destName}
-              </p>
-              <small>
-                {ride.members.length} riders · code {ride.code}
-              </small>
-            </Link>
-          ))}
+        {loading ? (
+  <div className="dashboard-loading" role="status">
+    <div className="loading-spinner" />
+    <p>Loading your rides...</p>
+  </div>
+) : rides.length === 0 ? (
+  <section className="empty-state">
+    <div className="empty-state-icon">🏍️</div>
+    <h2>No rides yet!</h2>
+    <p>
+      Your next adventure starts here.
+      Create a ride and invite your friends to join.
+    </p>
+    <Link className="btn btn-primary" to="/app/create">
+      Plan your first ride
+    </Link>
+  </section>
+) : (
+  <div className="ride-grid">
+    {rides.map((ride) => (
+      <Link
+        key={ride.id}
+        className="ride-card"
+        to={`/app/ride/${ride.id}`}
+      >
+        <div className={`pill ${ride.status}`}>
+          {ride.status}
         </div>
+        <h3>{ride.name}</h3>
+        <p>
+          {ride.startName} → {ride.destName}
+        </p>
+        <small>
+          {ride.members.length} riders · code {ride.code}
+        </small>
+      </Link>
+    ))}
+  </div>
+)}
       </main>
     </div>
   );
