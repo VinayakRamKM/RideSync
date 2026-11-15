@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
 import Landing from './pages/Landing.jsx';
@@ -18,38 +19,61 @@ function Guard({ children }) {
 
 export default function App() {
   const { ready } = useAuth();
-  if (!ready) return <div className="boot">Loading RideSync…</div>;
+  const [theme, setTheme] = useState(() =>
+    localStorage.getItem('ridesync-theme') === 'dark' ? 'dark' : 'light'
+  );
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('ridesync-theme', theme);
+  }, [theme]);
+
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/join/:token" element={<JoinRide />} />
-      <Route
-        path="/app"
-        element={
-          <Guard>
-            <Dashboard />
-          </Guard>
-        }
-      />
-      <Route
-        path="/app/create"
-        element={
-          <Guard>
-            <CreateRide />
-          </Guard>
-        }
-      />
-      <Route
-        path="/app/ride/:id"
-        element={
-          <Guard>
-            <RideMap />
-          </Guard>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      {ready ? (
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/join/:token" element={<JoinRide />} />
+          <Route
+            path="/app"
+            element={
+              <Guard>
+                <Dashboard />
+              </Guard>
+            }
+          />
+          <Route
+            path="/app/create"
+            element={
+              <Guard>
+                <CreateRide />
+              </Guard>
+            }
+          />
+          <Route
+            path="/app/ride/:id"
+            element={
+              <Guard>
+                <RideMap />
+              </Guard>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      ) : (
+        <div className="boot">Loading RideSync…</div>
+      )}
+      <button
+        className="theme-toggle"
+        type="button"
+        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        aria-pressed={theme === 'dark'}
+        onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+      >
+        {theme === 'dark' ? '☀ Light' : '☾ Dark'}
+      </button>
+    </>
   );
 }

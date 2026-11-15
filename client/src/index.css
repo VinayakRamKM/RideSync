@@ -81,7 +81,14 @@ button, input, textarea { font: inherit; }
 .step-card h2 span { flex: 0 0 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; background: #203958; color: #fff; font-size: 12px; }
 .step-card > p { min-height: 43px; margin: 7px 0 10px; color: #53657b; font-size: 11px; line-height: 1.4; }
 .phone-shot { display: flex; height: 284px; align-items: center; justify-content: center; }
-.phone-shot img { display: block; width: auto; height: 100%; max-width: 100%; object-fit: contain; }
+.phone-shot img {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 22px;
+}
 
 .features { display: grid; grid-template-columns: minmax(145px, .8fr) 4fr; align-items: stretch; gap: 14px; margin: 16px max(18px, calc((100vw - 1440px) / 2)) 12px; padding: 18px; border-radius: 15px; background: #f0f5fc; }
 .features > div { align-self: center; padding: 0 12px 0 2px; border-right: 1px solid #d2deeb; }
@@ -160,7 +167,7 @@ button, input, textarea { font: inherit; }
 .map-canvas { height: 100%; min-height: 320px; }
 .map-sheet {
   background: #fff; color: var(--navy); border-radius: 20px 20px 0 0;
-  padding: 16px 16px 20px; max-height: 42vh; overflow: auto;
+  padding: 16px 16px 68px; max-height: 42vh; overflow: auto;
   box-shadow: 0 -10px 30px rgba(0,0,0,.12);
 }
 .sheet-head { display: flex; justify-content: space-between; align-items: start; }
@@ -403,3 +410,73 @@ textarea:focus-visible {
   line-height: 1.6;
   margin: 0 0 20px;
 }
+
+.theme-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: var(--navy);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,.2);
+}
+
+.theme-toggle:hover { filter: brightness(1.2); }
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  background: #0d1724;
+  color: #e8eef8;
+}
+
+html[data-theme="dark"] body { background: #0d1724; }
+html[data-theme="dark"] .boot { color: #e8eef8; }
+html[data-theme="dark"] .landing { background: #101c2a; color: #e8eef8; }
+html[data-theme="dark"] .landing-steps { background: #111f2e; }
+html[data-theme="dark"] .step-card,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .ride-card,
+html[data-theme="dark"] .map-sheet,
+html[data-theme="dark"] .float-alert,
+html[data-theme="dark"] .empty-state {
+  background: #1a2a3c;
+  color: #e8eef8;
+}
+html[data-theme="dark"] .step-card h2,
+html[data-theme="dark"] .features li > span,
+html[data-theme="dark"] .features strong,
+html[data-theme="dark"] .empty-state h2 {
+  color: #e8eef8;
+}
+html[data-theme="dark"] .step-card > p,
+html[data-theme="dark"] .features p,
+html[data-theme="dark"] .features li,
+html[data-theme="dark"] .muted,
+html[data-theme="dark"] .empty-state p,
+html[data-theme="dark"] .invite-results small {
+  color: #a9b8cb;
+}
+html[data-theme="dark"] .features { background: #152538; }
+html[data-theme="dark"] .features > div,
+html[data-theme="dark"] .features li + li,
+html[data-theme="dark"] .rider-list li {
+  border-color: #33465d;
+}
+html[data-theme="dark"] .app-shell { background: #101c2a; color: #e8eef8; }
+html[data-theme="dark"] .card input,
+html[data-theme="dark"] .card textarea,
+html[data-theme="dark"] .join-row input,
+html[data-theme="dark"] .hints button {
+  background: #111f2e;
+  border-color: #40536a;
+  color: #e8eef8;
+}
+html[data-theme="dark"] .pill { background: #2a3b50; color: #d7e3f2; }
+html[data-theme="dark"] .pill.live { background: #164b3c; color: #8af0c6; }
+html[data-theme="dark"] .pill.planned { background: #1d3d64; color: #a9cfff; }
+html[data-theme="dark"] .empty-state { border-color: #40536a; }
