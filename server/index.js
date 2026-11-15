@@ -201,7 +201,15 @@ app.get("/api/geo/search", auth, async (req, res) => {
       lng: Number(r.lon),
       name: r.display_name,
     }));
-    res.json([...local, ...mapped].slice(0, 8));
+    const uniqueResults = [...local, ...mapped].filter(
+      (place, index, self) =>
+        index ===
+        self.findIndex(
+          (item) => item.name.toLowerCase() === place.name.toLowerCase(),
+        ),
+    );
+
+    res.json(uniqueResults.slice(0, 8));
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
@@ -276,22 +284,18 @@ app.post("/api/rides", auth, async (req, res) => {
       .json({ error: "Ride name, start, and destination are required" });
   }
   if (startName === "Current location" && !startCoordinates) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "Current start coordinates are missing. Select “Use my current location” again.",
-      });
+    return res.status(400).json({
+      error:
+        "Current start coordinates are missing. Select “Use my current location” again.",
+    });
   }
   try {
     let start;
     if (startCoordinates) {
       if (startCoordinates.lat == null || startCoordinates.lng == null) {
-        return res
-          .status(400)
-          .json({
-            error: "Current start location must contain valid coordinates",
-          });
+        return res.status(400).json({
+          error: "Current start location must contain valid coordinates",
+        });
       }
       const lat = Number(startCoordinates.lat);
       const lng = Number(startCoordinates.lng);
@@ -303,11 +307,9 @@ app.post("/api/rides", auth, async (req, res) => {
         lng < -180 ||
         lng > 180
       ) {
-        return res
-          .status(400)
-          .json({
-            error: "Current start location must contain valid coordinates",
-          });
+        return res.status(400).json({
+          error: "Current start location must contain valid coordinates",
+        });
       }
       start = { lat, lng, name: "Current location" };
     } else {
@@ -315,20 +317,16 @@ app.post("/api/rides", auth, async (req, res) => {
     }
     const dest = await geocode(destName);
     if (!start) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Could not find the start point. Try another place or use your current location.",
-        });
+      return res.status(400).json({
+        error:
+          "Could not find the start point. Try another place or use your current location.",
+      });
     }
     if (!dest) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Could not find the destination. Check its name or choose a suggested place.",
-        });
+      return res.status(400).json({
+        error:
+          "Could not find the destination. Check its name or choose a suggested place.",
+      });
     }
     const user = db.get().users.find((u) => u.id === req.user.id);
     const ride = {
