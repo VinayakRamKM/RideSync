@@ -164,6 +164,8 @@ button, input, textarea { font: inherit; }
 .nav-banner strong { display: block; }
 .nav-banner span { color: var(--teal); font-size: 13px; }
 .nav-banner .back { color: #cfe0f4; text-decoration: none; }
+.current-direction { flex: 1; min-width: 0; }
+.current-direction strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .map-canvas { height: 100%; min-height: 320px; }
 .map-sheet {
   background: #fff; color: var(--navy); border-radius: 20px 20px 0 0;

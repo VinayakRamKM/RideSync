@@ -34,6 +34,8 @@ export default function RideMapView({
   meId,
   route,
   followId,
+  navigationFocus,
+  recenterRequest,
   target,
   onSelectMember,
 }) {
@@ -105,6 +107,16 @@ export default function RideMapView({
 
   useEffect(() => {
     const map = mapRef.current;
+    if (!map || !navigationFocus) return;
+    map.setView(
+      [navigationFocus.lat, navigationFocus.lng],
+      Math.max(map.getZoom(), 16),
+      { animate: true }
+    );
+  }, [navigationFocus]);
+
+  useEffect(() => {
+    const map = mapRef.current;
     if (!map) return;
     const layers = layerRef.current;
     const seen = new Set();
@@ -132,7 +144,7 @@ export default function RideMapView({
     if (follow?.lat != null) {
       map.panTo([follow.lat, follow.lng], { animate: true });
     }
-  }, [members, meId, followId, onSelectMember]);
+  }, [members, meId, followId, recenterRequest, onSelectMember]);
 
   useEffect(() => {
     const map = mapRef.current;
