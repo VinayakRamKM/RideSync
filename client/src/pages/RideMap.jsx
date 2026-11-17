@@ -214,11 +214,16 @@ export default function RideMap() {
         }
       },
       (positionError) => {
-        const messages = {
-          1: 'Location access is blocked. Allow location access in your browser settings to share your live position.',
-          2: 'Your current location is unavailable. Check your device location services and try again.',
-          3: 'Could not get your location in time. Keep location services enabled and try again.',
-        };
+       const messages = {
+  // Error Code 1: Permission Denied
+  1: 'Location access is blocked. Allow location access in your browser settings to share your live position.',
+
+  // Error Code 2: Position Unavailable
+  2: 'Your current location is unavailable. Check your device location services and try again.',
+
+  // Error Code 3: Timeout
+  3: 'Could not get your location in time. Keep location services enabled and try again.',
+};
         setGeolocationError(messages[positionError.code] || 'Unable to access your live location.');
       },
       { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
