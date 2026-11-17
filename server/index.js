@@ -59,6 +59,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: CLIENT_ORIGIN, methods: ["GET", "POST"] },
 });
+const separatedMembers = new Set();
 
 function tokenFor(user) {
   return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
@@ -632,18 +633,24 @@ io.on("connection", (socket) => {
       .get()
       .members.find((m) => m.rideId === rideId && m.userId === ride.leaderId);
     const dist = haversine({ lat, lng }, leader);
+    const separationKey = `${rideId}:${socket.user.id}`;
     if (leader && socket.user.id !== ride.leaderId && dist > 2000) {
-      const user = db.get().users.find((u) => u.id === socket.user.id);
-      io.to(`ride:${rideId}`).emit("ride:alert", {
-        type: "separated",
-        userId: socket.user.id,
-        name: user.name,
-        emoji: user.emoji,
-        distanceKm: Math.round((dist / 1000) * 10) / 10,
-        message: `${user.name} is ${(dist / 1000).toFixed(1)} km behind the group`,
-        lat,
-        lng,
-      });
+      if (!separatedMembers.has(separationKey)) {
+        separatedMembers.add(separationKey);
+        const user = db.get().users.find((u) => u.id === socket.user.id);
+        io.to(`ride:${rideId}`).emit("ride:alert", {
+          type: "separated",
+          userId: socket.user.id,
+          name: user.name,
+          emoji: user.emoji,
+          distanceKm: Math.round((dist / 1000) * 10) / 10,
+          message: `${user.name} is ${(dist / 1000).toFixed(1)} km behind the group`,
+          lat,
+          lng,
+        });
+      }
+    } else {
+      separatedMembers.delete(separationKey);
     }
     io.to(`ride:${rideId}`).emit("ride:locations", {
       members: rideBundle(ride).members,

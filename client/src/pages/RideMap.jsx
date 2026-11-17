@@ -131,7 +131,11 @@ export default function RideMap() {
       setRide((prev) => (prev ? { ...prev, members: payload.members } : prev));
     });
     socket.on('ride:alert', (payload) => {
-      if (payload.userId !== user.id) setAlert(payload);
+      if (payload.userId !== user.id) {
+        setAlert((current) =>
+          current?.type === 'stop' && payload.type === 'separated' ? current : payload
+        );
+      }
     });
     return () => socket.disconnect();
   }, [id, user.id]);
