@@ -58,7 +58,7 @@ async function sendInvite({ to, ride, inviter, joinUrl }) {
     }
   }
 
-  db.update((store) => {
+  await db.update((store) => {
     store.outbox.push({
       id: crypto.randomUUID(),
       to,

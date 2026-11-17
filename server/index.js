@@ -1,4 +1,6 @@
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env.local") });
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
@@ -159,7 +161,7 @@ app.post("/api/auth/register", async (req, res) => {
     emoji: EMOJIS[db.get().users.length % EMOJIS.length],
     createdAt: new Date().toISOString(),
   };
-  db.update((store) => store.users.push(user));
+  await db.update((store) => store.users.push(user));
   res.json({ token: tokenFor(user), user: publicUser(user) });
 });
 
@@ -343,7 +345,7 @@ app.post("/api/rides", auth, async (req, res) => {
       code: Math.random().toString(36).slice(2, 8).toUpperCase(),
       createdAt: new Date().toISOString(),
     };
-    db.update((store) => {
+    await db.update((store) => {
       store.rides.push(ride);
       store.members.push({
         rideId: ride.id,
@@ -363,7 +365,7 @@ app.post("/api/rides", auth, async (req, res) => {
   }
 });
 
-app.post("/api/rides/join", auth, (req, res) => {
+app.post("/api/rides/join", auth, async (req, res) => {
   const code = String(req.body?.code || "")
     .trim()
     .toUpperCase();
@@ -373,7 +375,7 @@ app.post("/api/rides/join", auth, (req, res) => {
     .get()
     .members.find((m) => m.rideId === ride.id && m.userId === req.user.id);
   if (!already) {
-    db.update((store) => {
+    await db.update((store) => {
       store.members.push({
         rideId: ride.id,
         userId: req.user.id,
@@ -430,7 +432,7 @@ app.post("/api/rides/:id/invite", auth, async (req, res) => {
       invitedBy: req.user.id,
       createdAt: new Date().toISOString(),
     };
-    db.update((store) => store.invites.push(invite));
+    await db.update((store) => store.invites.push(invite));
     const joinUrl = `${CLIENT_ORIGIN}/join/${invite.token}`;
     const sent = await sendInvite({ to: email, ride, inviter, joinUrl });
     results.push({
@@ -465,7 +467,7 @@ app.get("/api/join/:token", (req, res) => {
   });
 });
 
-app.post("/api/join/:token", auth, (req, res) => {
+app.post("/api/join/:token", auth, async (req, res) => {
   const invite = db.get().invites.find((i) => i.token === req.params.token);
   if (!invite)
     return res.status(404).json({ error: "Invite expired or invalid" });
@@ -474,7 +476,7 @@ app.post("/api/join/:token", auth, (req, res) => {
     .get()
     .members.find((m) => m.rideId === ride.id && m.userId === req.user.id);
   if (!already) {
-    db.update((store) => {
+    await db.update((store) => {
       store.members.push({
         rideId: ride.id,
         userId: req.user.id,
@@ -495,7 +497,7 @@ app.post("/api/join/:token", auth, (req, res) => {
   res.json(rideBundle(db.get().rides.find((r) => r.id === ride.id)));
 });
 
-app.post("/api/rides/:id/status", auth, (req, res) => {
+app.post("/api/rides/:id/status", auth, async (req, res) => {
   const { status } = req.body || {};
   const ride = db.get().rides.find((r) => r.id === req.params.id);
   if (!ride) return res.status(404).json({ error: "Ride not found" });
@@ -518,7 +520,7 @@ app.post("/api/rides/:id/status", auth, (req, res) => {
       return res.status(400).json({ error: "Invalid status" });
     }
   }
-  db.update((store) => {
+  await db.update((store) => {
     const row = store.rides.find((r) => r.id === ride.id);
     row.status = status;
   });
@@ -527,7 +529,7 @@ app.post("/api/rides/:id/status", auth, (req, res) => {
   res.json(updated);
 });
 
-app.post("/api/rides/:id/member-status", auth, (req, res) => {
+app.post("/api/rides/:id/member-status", auth, async (req, res) => {
   const { status } = req.body || {};
   const allowed = [
     "riding",
@@ -547,7 +549,7 @@ app.post("/api/rides/:id/member-status", auth, (req, res) => {
     );
   if (!member)
     return res.status(403).json({ error: "You are not on this ride" });
-  db.update((store) => {
+  await db.update((store) => {
     const row = store.members.find(
       (m) => m.rideId === req.params.id && m.userId === req.user.id,
     );
@@ -604,22 +606,27 @@ io.on("connection", (socket) => {
     );
   });
 
-  socket.on("ride:location", (payload) => {
+  socket.on("ride:location", async (payload) => {
     const { rideId, lat, lng, heading, speed } = payload || {};
     const member = db
       .get()
       .members.find((m) => m.rideId === rideId && m.userId === socket.user.id);
     if (!member) return;
-    db.update((store) => {
-      const row = store.members.find(
-        (m) => m.rideId === rideId && m.userId === socket.user.id,
-      );
-      row.lat = lat;
-      row.lng = lng;
-      row.heading = heading || 0;
-      row.speed = speed || 0;
-      row.lastSeen = new Date().toISOString();
-    });
+    try {
+      await db.update((store) => {
+        const row = store.members.find(
+          (m) => m.rideId === rideId && m.userId === socket.user.id,
+        );
+        row.lat = lat;
+        row.lng = lng;
+        row.heading = heading || 0;
+        row.speed = speed || 0;
+        row.lastSeen = new Date().toISOString();
+      });
+    } catch (error) {
+      console.error("Failed to persist ride location", error);
+      return;
+    }
     const ride = db.get().rides.find((r) => r.id === rideId);
     const leader = db
       .get()
@@ -654,6 +661,13 @@ app.get(/.*/, (req, res, next) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`RideSync API on http://localhost:${PORT}`);
-});
+db.initialize()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`RideSync API on http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to initialize database", error);
+    process.exitCode = 1;
+  });

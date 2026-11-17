@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { api, getToken } from '../api';
+import { API_BASE_URL, api, getToken } from '../api';
 import { useAuth } from '../AuthContext.jsx';
 import InviteModal from '../components/InviteModal.jsx';
 import RideMapView from '../components/RideMapView.jsx';
@@ -123,7 +123,7 @@ export default function RideMap() {
   }, [id, loadRoute]);
 
   useEffect(() => {
-    const socket = io({ auth: { token: getToken() } });
+    const socket = io(API_BASE_URL || undefined, { auth: { token: getToken() } });
     socketRef.current = socket;
     socket.emit('ride:join', id);
     socket.on('ride:update', setRide);
